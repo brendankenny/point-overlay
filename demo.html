@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>point-map Demo</title>
+
+  <style>
+    html, body {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    google-map {
+      display: block;
+      height: 100%;
+    }
+  </style>
+
+  <script src="../platform/platform.js"></script>
+  <link rel="import" href="../google-map/google-map.html">
+  <link rel="import" href="point-overlay.html">
+</head>
+<body>
+  <template is="auto-binding">
+    <google-map map="{{map}}" latitude="37.779" longitude="-122.3892" zoom="13" disableDefaultUI></google-map>
+    <point-overlay map="{{map}}" data='[{"lat": 37.779, "lng": -122.3892}]'></point-overlay>
+    <script>
+      var mapElement = document.querySelector('google-map');
+      mapElement.addEventListener('google-map-ready', mapLoaded);
+
+      function mapLoaded(e) {
+        var map = this.map;
+        map.setOptions({
+          styles: [
+            {
+              stylers: [{saturation: -85}]
+            }, {
+              featureType: "water",
+              elementType: "geometry",
+              stylers: [
+                { lightness: -20 }
+              ]
+            }
+          ]
+        });
+      }
+    </script>
+  </template>
+</body>
+</html>
