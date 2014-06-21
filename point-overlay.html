@@ -82,6 +82,12 @@ Uses WebGL for rendering.
 
       setData: function() {
         if (this.pointMap_ && this.data) {
+          // this.data needs to default to an array for Polymer type hinting, so
+          // don't set if empty array (effect is the same if empty array is set)
+          if (Array.isArray(this.data) && this.data.length === 0) {
+            return;
+          }
+
           this.pointMap_.setData(this.data);
         }
       },
