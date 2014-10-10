@@ -87,7 +87,7 @@ function PointMap(map) {
    * The base point size.
    * @private {number}
    */
-  this.pointScale_ = 1 / 64;
+  this.pointScale_ = 1 / 256;
 
   /**
    * The base point opacity.
