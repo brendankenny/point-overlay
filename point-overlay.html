@@ -1,10 +1,9 @@
 <link rel="import" href="../polymer/polymer.html">
-
 <script src="lib/CanvasLayer.js"></script>
 <script src="lib/ShaderProgram.js"></script>
 <script src="point-map.js"></script>
-
-<!--
+<dom-module id="point-overlay">
+    <!--
 Element providing a
 [CanvasLayer](https://github.com/brendankenny/CanvasLayer)-based overlay for a
 Google Maps API v3 map to render an array of many objects as points on a map.
@@ -19,78 +18,96 @@ Uses WebGL for rendering.
 @status alpha
 @homepage https://github.com/brendankenny/point-overlay
 -->
-<polymer-element name="point-overlay" attributes="map overlay data">
-  <template>
-  </template>
-
-  <script>
+    <template>
+    </template>
+    <script>
     /* jshint newcap: false */
     /* global Polymer, PointMap, createCanvasLayer */
-    Polymer('point-overlay', {
-      /**
-       * A Google map object that this layer will overlay.
-       *
-       * @attribute map
-       * @type google.maps.Map
-       * @default null
-       */
-      map: null,
+    Polymer({
+        is: 'point-overlay',
+        /**
+         * A Google map object that this layer will overlay.
+         *
+         * @attribute map
+         * @type google.maps.Map
+         * @default null
+         */
+        map: null,
 
-      /**
-       * The underlying CanvasLayer map overlay. Useful for direct canvas
-       * access or to schedule a requestAnimationFrame update, for instance.
-       *
-       * @attribute overlay
-       * @type CanvasLayer
-       * @default null
-       */
-      overlay: null,
+        /**
+         * The underlying CanvasLayer map overlay. Useful for direct canvas
+         * access or to schedule a requestAnimationFrame update, for instance.
+         *
+         * @attribute overlay
+         * @type CanvasLayer
+         * @default null
+         */
+        overlay: null,
 
-      /**
-       * Array of objects to render as points, with at least `lat` and `lng` as
-       * properties per object.
-       *
-       * @attribute data
-       * @type Array.<{lat: number, lng: number}>
-       * @default []
-       */
-      data: [],
+        /**
+         * Array of objects to render as points, with at least `lat` and `lng` as
+         * properties per object.
+         *
+         * @attribute data
+         * @type Array.<{lat: number, lng: number}>
+         * @default []
+         */
+        data: [],
 
-      /**
-       * The PointMap renderer.
-       * @private {PointMap}
-       */
-      pointMap_: null,
+        /**
+         * The PointMap renderer.
+         * @private {PointMap}
+         */
+        pointMap_: null,
 
-      mapChanged: function() {
-        if (this.map && this.map instanceof google.maps.Map) {
-          // TODO(bckenny): hack to work around CanvasLayer.prototype's reliance
-          // on the Maps API
-          window.CanvasLayer = createCanvasLayer();
+        mapChanged: function() {
+            if (this.map) {
+                // TODO(bckenny): hack to work around CanvasLayer.prototype's reliance
+                // on the Maps API
+                window.CanvasLayer = createCanvasLayer();
 
-          this.pointMap_ = new PointMap(this.map);
-          this.overlay = this.pointMap_.getCanvasLayer();
+                this.pointMap_ = new PointMap(this.map);
+                this.overlay = this.pointMap_.getCanvasLayer();
 
-          // if data was set before the map was initialized, pass it to pointMap
-          this.setData();
+                // if data was set before the map was initialized, pass it to pointMap
+                this.setData();
+            }
+        },
+
+        dataChanged: function() {
+            this.setData();
+        },
+
+        setData: function() {
+            if (this.pointMap_ && this.data) {
+                // this.data needs to default to an array for Polymer type hinting, so
+                // don't set if empty array (effect is the same if empty array is set)
+                if (Array.isArray(this.data) && this.data.length === 0) {
+                    return;
+                }
+
+                this.pointMap_.setData(this.data);
+            }
+        },
+        mapObs: function(elem) {
+          this.mapChanged()
+        },
+        dataObse: function(elem) {
+          this.dataChanged()
+        },
+
+        observers: ['mapObs(map.*)', 'dataObse(data.*)'],
+        properties: {
+            map: {
+                type: Object,
+                notify: true,
+            },
+            data: {
+                type: Array,
+                notify: true,
+            }
+
         }
-      },
-
-      dataChanged: function() {
-        this.setData();
-      },
-
-      setData: function() {
-        if (this.pointMap_ && this.data) {
-          // this.data needs to default to an array for Polymer type hinting, so
-          // don't set if empty array (effect is the same if empty array is set)
-          if (Array.isArray(this.data) && this.data.length === 0) {
-            return;
-          }
-
-          this.pointMap_.setData(this.data);
-        }
-      },
     });
-  </script>
-</polymer-element>
+    </script>
+</dom-module>
